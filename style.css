@@ -5689,6 +5689,597 @@ html, body {
 }
 
 /* =========================================================
+   BERTO MOBILE-FIRST DESIGN SYSTEM
+   ========================================================= */
+
+/* Mobile-First Base Adjustments */
+@media (max-width: 768px) {
+  /* Typography Scale */
+  html {
+    font-size: 15px;
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Consistent Spacing System */
+  .app-shell {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Top Bar - Native App Feel */
+  .topbar {
+    height: 56px !important;
+    padding: 0 16px !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: rgba(7, 9, 8, 0.95) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+  }
+  
+  .topbar-left {
+    gap: 8px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .menu-button {
+    width: 36px !important;
+    height: 36px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 10px !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .menu-button:active {
+    transform: scale(0.92) !important;
+    background: var(--surface-3) !important;
+  }
+  
+  .mobile-brand {
+    font: 700 16px var(--display) !important;
+    letter-spacing: -0.04em !important;
+    color: var(--text) !important;
+    display: inline-block !important;
+  }
+  
+  .breadcrumb {
+    display: none !important;
+  }
+  
+  .persona-selector {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    max-width: 110px !important;
+    border-radius: 999px !important;
+    background: var(--surface-3) !important;
+    border: 1px solid var(--border-strong) !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .persona-selector:active {
+    transform: scale(0.96) !important;
+  }
+  
+  .persona-selector select {
+    font-size: 11px !important;
+    padding-right: 18px !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text) !important;
+    font-weight: 600 !important;
+  }
+  
+  .model-selector {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+    background: rgba(20, 26, 23, 0.75) !important;
+    border: 1px solid var(--border-strong) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .model-selector:active {
+    transform: scale(0.96) !important;
+    border-color: var(--accent-strong) !important;
+  }
+  
+  .topbar-right {
+    gap: 4px !important;
+  }
+  
+  .topbar-right .icon-button {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+  }
+  
+  /* Chat Layout */
+  .chat-layout {
+    height: auto !important;
+    min-height: calc(100vh - 56px) !important;
+    max-width: 100% !important;
+  }
+  
+  .chat-main {
+    padding: 16px !important;
+    min-height: calc(100vh - 56px - 200px) !important;
+  }
+  
+  .chat-scroll {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  
+  /* Welcome Section */
+  .welcome {
+    margin-top: 24px !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .welcome h1 {
+    font-size: 40px !important;
+    letter-spacing: -0.05em !important;
+  }
+  
+  .eyebrow {
+    font-size: 10px !important;
+    letter-spacing: 0.14em !important;
+    margin-bottom: 12px !important;
+  }
+  
+  /* Suggestions Grid */
+  .suggestions {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .suggestion {
+    min-height: 80px !important;
+    padding: 14px !important;
+    border-radius: 14px !important;
+    transition: all 0.25s var(--ease) !important;
+  }
+  
+  .suggestion:active {
+    transform: scale(0.97) !important;
+    border-color: var(--accent-strong) !important;
+  }
+  
+  .suggestion strong {
+    font-size: 13px !important;
+  }
+  
+  .suggestion small {
+    font-size: 10px !important;
+  }
+  
+  /* Composer - Native Keyboard Feel */
+  .composer-wrap {
+    padding: 8px 12px !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    background: var(--bg) !important;
+    border-top: 1px solid var(--border) !important;
+    position: sticky !important;
+    bottom: 0 !important;
+  }
+  
+  .composer {
+    border-radius: 20px !important;
+    border: 1px solid var(--border-strong) !important;
+    background: rgba(18, 23, 20, 0.95) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .composer:focus-within {
+    border-color: var(--accent) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent) !important;
+  }
+  
+  .composer textarea {
+    padding: 14px 16px 8px !important;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    min-height: 44px !important;
+    max-height: 150px !important;
+  }
+  
+  .composer-footer {
+    padding: 6px 10px 10px !important;
+    gap: 6px !important;
+  }
+  
+  .composer-tools {
+    gap: 4px !important;
+  }
+  
+  .tool-button {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    transition: all 0.15s var(--ease) !important;
+  }
+  
+  .tool-button:active {
+    transform: scale(0.9) !important;
+    background: var(--accent-wash) !important;
+  }
+  
+  .send-button {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .send-button:active {
+    transform: scale(0.9) !important;
+  }
+  
+  /* Messages */
+  .messages {
+    gap: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .message {
+    gap: 10px !important;
+    animation: rise 0.3s var(--ease) !important;
+  }
+  
+  .message-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+    border-radius: 50% !important;
+  }
+  
+  .user .message-avatar {
+    order: 2 !important;
+  }
+  
+  .message-body {
+    max-width: calc(100% - 44px) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+  
+  .user .message-body {
+    border-radius: 18px 4px 18px 18px !important;
+    padding: 10px 14px !important;
+  }
+  
+  .assistant .message-body {
+    border-radius: 4px 18px 18px 18px !important;
+  }
+  
+  /* Message Actions */
+  .message-actions {
+    opacity: 1 !important;
+    margin-top: 6px !important;
+    gap: 6px !important;
+  }
+  
+  .message-actions button {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    border-radius: 8px !important;
+    min-height: 32px !important;
+    min-width: 32px !important;
+  }
+  
+  /* Sidebar - Full Screen Overlay */
+  .sidebar {
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 16px !important;
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
+    background: rgba(13, 17, 15, 0.98) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    backdrop-filter: blur(30px) !important;
+  }
+  
+  .sidebar-top {
+    padding: 0 0 20px 0 !important;
+  }
+  
+  .brand {
+    font-size: 22px !important;
+    gap: 10px !important;
+  }
+  
+  .brand-mark {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+  }
+  
+  .nav-item {
+    height: 44px !important;
+    padding: 0 14px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .nav-item:active {
+    transform: scale(0.97) !important;
+    background: var(--surface-3) !important;
+  }
+  
+  .nav-item.active {
+    background: var(--accent-wash) !important;
+    color: var(--accent) !important;
+  }
+  
+  .new-chat {
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .chat-list {
+    max-height: none !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+  
+  .chat-item {
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    min-height: 48px !important;
+  }
+  
+  .chat-item:active {
+    background: var(--surface-3) !important;
+    transform: scale(0.98) !important;
+  }
+  
+  /* Pages */
+  .page-shell {
+    padding: 24px 16px 80px !important;
+    max-width: 100% !important;
+  }
+  
+  .page-heading {
+    margin-bottom: 24px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  
+  .page-heading h2 {
+    font-size: 32px !important;
+    letter-spacing: -0.05em !important;
+  }
+  
+  .page-heading p {
+    font-size: 14px !important;
+  }
+  
+  /* Buttons */
+  .button {
+    height: 44px !important;
+    padding: 0 18px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    min-height: 44px !important;
+    transition: all 0.2s var(--ease) !important;
+  }
+  
+  .button:active {
+    transform: scale(0.96) !important;
+  }
+  
+  .button.primary {
+    background: var(--accent) !important;
+    color: #08271f !important;
+  }
+  
+  /* Writing Studio */
+  .writing-studio-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .writing-canvas {
+    border-radius: 16px !important;
+  }
+  
+  .editor-container textarea {
+    font-size: 16px !important;
+    padding: 20px !important;
+    min-height: 300px !important;
+  }
+  
+  /* Voice Mode */
+  .voice-shell {
+    padding: 24px 16px 80px !important;
+    min-height: calc(100vh - 56px) !important;
+  }
+  
+  .voice-stage-container {
+    min-height: 280px !important;
+    border-radius: 16px !important;
+  }
+  
+  .voice-button {
+    height: 48px !important;
+    padding: 0 20px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+    min-height: 48px !important;
+  }
+  
+  .voice-controls-bar {
+    gap: 10px !important;
+    padding: 12px 16px !important;
+    border-radius: 14px !important;
+  }
+  
+  /* Settings */
+  .settings-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .settings-nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding: 6px !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
+  }
+  
+  .settings-nav button {
+    white-space: nowrap !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+  
+  .settings-section {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+  
+  .setting-row {
+    padding: 14px 0 !important;
+    min-height: auto !important;
+  }
+  
+  .setting-row strong {
+    font-size: 14px !important;
+  }
+  
+  .setting-row span {
+    font-size: 12px !important;
+  }
+  
+  /* Modals */
+  .modal-backdrop {
+    padding: 16px !important;
+  }
+  
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+  
+  .modal-head {
+    margin-bottom: 16px !important;
+  }
+  
+  .modal-head h3 {
+    font-size: 18px !important;
+  }
+  
+  /* Kanban Board */
+  .kanban-board {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .kanban-column {
+    min-height: auto !important;
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+  
+  /* File Grid */
+  .file-grid,
+  .project-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  /* Toast Notifications */
+  .toast-stack {
+    right: 12px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+  }
+  
+  .toast {
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Extra Small Mobile Optimization */
+@media (max-width: 380px) {
+  html {
+    font-size: 14px !important;
+  }
+  
+  .topbar {
+    padding: 0 12px !important;
+  }
+  
+  .persona-selector {
+    max-width: 90px !important;
+    padding: 3px 8px !important;
+  }
+  
+  .model-selector {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+  
+  .suggestions {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .composer textarea {
+    padding: 12px 14px 6px !important;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .topbar {
+    height: 48px !important;
+  }
+  
+  .chat-main {
+    min-height: calc(100vh - 48px - 180px) !important;
+  }
+  
+  .composer-wrap {
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  }
+  
+  .welcome h1 {
+    font-size: 32px !important;
+  }
+  
+  .suggestions {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* =========================================================
    BERTO NATIVE MOBILE APP UX OVERRIDES
    ========================================================= */
 
