@@ -5596,6 +5596,98 @@ html, body {
   }
 }
 
+/* Dedicated Attachment Preview Row (Prevents Textarea Overlap) */
+.attachment-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px 2px;
+}
+
+.attachment-preview-container:empty {
+  display: none;
+}
+
+.attachment-thumb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 4px 8px 4px 6px;
+  font-size: 11px;
+  color: var(--text);
+  max-width: 100%;
+}
+
+.attachment-thumb-chip img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Mobile Screen Clean Alignment (< 600px) */
+@media (max-width: 600px) {
+  /* Header compaction */
+  .topbar {
+    padding: 0 10px;
+    height: 56px;
+  }
+  
+  .topbar-left {
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .persona-selector {
+    padding: 2px 6px;
+    font-size: 11px;
+    max-width: 120px;
+  }
+
+  .persona-selector select {
+    font-size: 11px;
+    padding-right: 14px;
+    text-overflow: ellipsis;
+  }
+
+  .model-selector {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .topbar-right .icon-button {
+    display: none; /* Hide duplicate search button on narrow screens */
+  }
+
+  /* Composer & Bottom Navigation Spacing */
+  .composer-wrap {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .composer {
+    border-radius: 16px;
+  }
+
+  .composer textarea {
+    padding: 12px 14px 6px;
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+  }
+
+  .composer-footer {
+    padding: 4px 8px 8px;
+  }
+
+  .composer-disclaimer {
+    margin: 4px 0 2px;
+    font-size: 10px;
+    opacity: 0.7;
+  }
+}
+
 /* =========================================================
    BERTO NATIVE MOBILE APP UX OVERRIDES
    ========================================================= */

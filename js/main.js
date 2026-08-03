@@ -2257,21 +2257,37 @@ function updateCount() {
 }
 
 function updateAttachmentLabel() {
-  const label = $('#attachment-label');
-  if (!label) return;
+  const container = $('#attachment-preview-container');
+  if (!container) return;
+
   if (currentAttachments.length === 0) {
-    label.textContent = '';
+    container.innerHTML = '';
     return;
   }
-  const names = currentAttachments.map(f => f.name || 'Pasted Image').join(', ');
-  label.innerHTML = `
-    <span class="attachment-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 
-      ${escapeHtml(names)} 
-      <button data-action="clear-attachments" class="clear-attach-btn" aria-label="Remove attachments">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </span>`;
+
+  container.innerHTML = currentAttachments.map((att, index) => {
+    const isImg = att.isImage || (att.type && att.type.startsWith('image/')) || (att.mimeType && att.mimeType.startsWith('image/'));
+    const imgSrc = isImg && att.content ? att.content : '';
+
+    return `
+      <div class="attachment-thumb-chip">
+        ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" alt="attachment">` : getFileIconSvg(att.name)}
+        <span class="file-chip-name" style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(att.name || 'File')}</span>
+        <button data-action="remove-single-attachment" data-index="${index}" style="background:none; border:none; color:var(--muted); cursor:pointer; font-weight:bold; padding:2px 4px;">✕</button>
+      </div>
+    `;
+  }).join('');
+
+  // Add click handler to remove individual attachments
+  container.querySelectorAll('[data-action="remove-single-attachment"]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const idx = Number(btn.dataset.index);
+      currentAttachments.splice(idx, 1);
+      updateAttachmentLabel();
+      updateCount();
+    };
+  });
 }
 
 function isApiKeyProtected(target) {
