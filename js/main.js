@@ -5240,3 +5240,20 @@ if (store.state.voiceFeaturesDisabled) {
 } else {
   detectManagedAccountRestrictions();
 }
+
+// Mobile Soft Keyboard Positioning Engine
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const chatMain = document.querySelector('.chat-main');
+    if (chatMain && window.innerWidth <= 800) {
+      // Adjust view height to match the visible viewport when soft keyboard appears
+      chatMain.style.height = `${window.visualViewport.height - 60}px`;
+      
+      // Auto-scroll to current message when keyboard opens
+      const scrollArea = document.querySelector('.chat-scroll');
+      if (scrollArea) {
+        scrollArea.scrollTop = scrollArea.scrollHeight;
+      }
+    }
+  });
+}

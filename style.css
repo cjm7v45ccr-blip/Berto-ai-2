@@ -5595,3 +5595,84 @@ html, body {
     padding-top: calc(20px + env(safe-area-inset-top));
   }
 }
+
+/* =========================================================
+   BERTO NATIVE MOBILE APP UX OVERRIDES
+   ========================================================= */
+
+/* 1. FIX: Prevent iOS Safari Auto-Zoom on Input Focus */
+@media (max-width: 800px) {
+  input, 
+  textarea, 
+  select {
+    font-size: 16px !important; /* Minimum 16px prevents forced iOS screen zoom */
+  }
+}
+
+/* 2. FIX: Use Dynamic Viewport Height (100dvh) for Modern Mobile Browsers */
+.app-shell {
+  height: 100dvh;
+}
+
+.chat-layout,
+.chat-main,
+.voice-shell {
+  height: calc(100dvh - 68px);
+}
+
+@media (max-width: 800px) {
+  .chat-layout,
+  .chat-main {
+    height: calc(100dvh - 60px);
+    min-height: calc(100dvh - 60px);
+  }
+}
+
+/* 3. Native App Feel: Disable accidental text selection on UI controls */
+.sidebar,
+.topbar,
+.button,
+.icon-button,
+.suggestion,
+.nav-item,
+.voice-controls,
+.model-selector,
+.persona-selector,
+.brand {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 4. Instant Touch Feedback for Mobile Taps */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  .suggestion:active,
+  .nav-item:active,
+  .chat-item:active {
+    transform: scale(0.96) !important;
+    opacity: 0.82;
+    transition: transform 0.08s var(--ease), opacity 0.08s ease;
+  }
+  
+  /* Smooth Momentum Scrolling for Touch Devices */
+  .chat-scroll,
+  .chat-list,
+  .view {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 5. Mobile Safe Area Adjustments (Notches & Dynamic Island) */
+@supports (padding: max(0px)) {
+  .topbar {
+    padding-top: env(safe-area-inset-top);
+  }
+  .composer-wrap {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .sidebar {
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
