@@ -1,0 +1,17 @@
+{
+  "name": "Berto · AI Workspace",
+  "short_name": "Berto",
+  "description": "A calm, capable AI workspace for thinking, writing, and getting things done.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070908",
+  "theme_color": "#070908",
+  "icons": [
+    {
+      "src": "assets/avatar.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

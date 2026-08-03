@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-density="comfortable" data-motion="full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070908" />
+  <meta name="description" content="Berto is a calm, capable AI workspace for thinking, writing, and getting things done." />
+  <link rel="icon" type="image/png" href="./assets/logo.png" />
+  <link rel="apple-touch-icon" href="./assets/logo.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Berto · AI workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- PDF & Docx Text Extractors -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <!-- Syntax Highlighting (Highlight.js) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Text Diffing Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+    <div class="ambient" aria-hidden="true"><span></span><span></span></div>
+
+    <!-- First-Time Setup Overlay -->
+    <div class="setup-overlay" id="setup-overlay" hidden>
+      <div class="setup-card">
+        <div class="setup-brand"><span class="brand-mark">B</span></div>
+        <h1 class="setup-title">Welcome to <span>Berto</span></h1>
+        <p class="setup-subtitle">Your calm, capable AI workspace. Let's get you set up in seconds.</p>
+        <div class="setup-fields">
+          <label class="setup-label">What should I call you?
+            <input class="setup-input" id="setup-name" type="text" placeholder="Your name" autocomplete="off" autofocus>
+          </label>
+          <label class="setup-label">Your Gemini API key
+            <input class="setup-input" id="setup-api-key" type="password" placeholder="AIza..." autocomplete="off">
+            <small class="setup-hint">Stored locally in your browser. Never sent anywhere else. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></small>
+          </label>
+        </div>
+        <button class="button primary setup-submit" id="setup-submit" disabled>
+          <span>Get Started</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="setup-skip"><button class="text-button" id="setup-skip">Skip for now</button></p>
+      </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+      <div class="sidebar-top">
+        <button class="brand" data-action="home" aria-label="Berto home"><span class="brand-mark"><img src="./assets/logo.png" alt="Berto"></span><span class="brand-name">Berto</span></button>
+        <button class="icon-button sidebar-close" data-action="close-mobile" aria-label="Close navigation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <button class="new-chat sidebar-new" data-action="new-chat">
+        <span class="plus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        <span class="nav-label">New chat</span>
+        <kbd>⌘ K</kbd>
+      </button>
+      <nav class="nav-list" aria-label="Workspace">
+        <button class="nav-item active" data-route="chat" title="Chats"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="nav-label">Chats</span><span class="nav-count">1</span></button>
+        <button class="nav-item" data-route="writing" title="Writing Studio"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="nav-label">Writing Studio</span></button>
+        <button class="nav-item" data-route="files" title="Files"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Files</span></button>
+        <button class="nav-item" data-route="projects" title="Projects"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span><span class="nav-label">Projects</span></button>
+
+        <button class="nav-item" data-route="voice" title="Voice"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span><span class="nav-label">Voice</span></button>
+      </nav>
+      <div class="sidebar-section">
+        <div class="section-label">
+          <span class="nav-label">Recent chats</span>
+          <button class="icon-button nav-label" data-action="search" aria-label="Search chats">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div class="chat-list" id="chat-list"></div>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-route="settings" title="Settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
+        <button class="profile-row" data-action="profile" aria-label="Open profile">
+          <span class="avatar">R</span>
+          <span class="nav-label profile-copy"><strong id="sidebar-name">Remberto</strong><small>Personal workspace</small></span>
+          <span class="nav-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+          </span>
+        </button>
+      </div>
+    </aside>
+    <div class="drawer-scrim" data-action="close-mobile"></div>
+
+    <!-- Main Workspace Container -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button menu-button" data-action="toggle-mobile" aria-label="Open navigation">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <span class="mobile-brand">berto</span>
+          <div class="breadcrumb" id="breadcrumb">Chats</div>
+          <div class="persona-selector">
+            <span class="persona-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <select id="persona-select" aria-label="Select Persona">
+              <option value="default" selected>Berto (Autonomous)</option>
+              <option value="engineer">Senior Software Engineer</option>
+              <option value="editor">Strict Copy Editor</option>
+              <option value="tutor">Socratic Tutor</option>
+              <option value="designer">UI/UX Architect</option>
+            </select>
+          </div>
+        </div>
+        <button class="model-selector" data-action="model"><span class="status-dot"></span><span id="model-label">Berto Fast</span><span class="chevron"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+        <div class="topbar-right">
+          <button class="icon-button" data-action="search" aria-label="Search chats">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button class="avatar top-avatar" data-action="profile" aria-label="Open profile">R</button>
+        </div>
+      </header>
+
+      <!-- View 1: Main Chat -->
+      <section class="view active" id="view-chat" data-view="chat">
+        <div class="chat-layout" id="chat-layout">
+          
+          <!-- Primary Chat Window -->
+          <div class="chat-main" id="chat-main">
+          <!-- Resizer handle will be injected here by JS -->
+            <div class="chat-scroll">
+              <div class="welcome" id="welcome">
+                <div class="eyebrow">
+                  <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span> 
+                  Your thinking partner
+                </div>
+                <h1>Hey, <span id="welcome-name">Remberto</span></h1>
+                <p>What can I help with today?</p>
+              </div>
+              <div class="suggestions" id="suggestions">
+                <button class="suggestion" data-prompt="Help me write a clear, professional email">
+                  <span class="suggestion-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                  <span><strong>Writing</strong><small>Make words work harder</small></span>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                </button>
+                <button class="suggestion" data-prompt="Research this topic and give me a concise brief">
+                  <span class="suggestion-icon amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                  <span><strong>Research</strong><small>Go from question to clarity</small></span>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                </button>
+                <button class="suggestion" data-prompt="Create a focused study plan for me">
+                  <span class="suggestion-icon violet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                  <span><strong>Study</strong><small>Learn with a plan</small></span>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                </button>
+                <button class="suggestion" data-prompt="Build an interactive workspace analytics widget">
+                  <span class="suggestion-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg></span>
+                  <span><strong>Artifact Demo</strong><small>Build live components</small></span>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                </button>
+              </div>
+              <div class="messages" id="messages" aria-live="polite"></div>
+            </div>
+            
+            <div class="composer-wrap">
+              <div class="drop-note" id="drop-note">Drop files to add context</div>
+              <div class="composer" id="composer">
+                <textarea id="prompt" rows="1" placeholder="Ask anything..." aria-label="Message Berto"></textarea>
+                <div class="composer-footer">
+  <div class="composer-tools">
+    <button class="tool-button camera-button" data-action="camera" aria-label="Take a photo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 2h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </button>
+    <button class="tool-button attach-file-button" data-action="attach" aria-label="Attach a file">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+                    <button class="tool-button" data-action="summarize-to-live" title="Brief Berto Live on this chat and switch to voice mode">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </button>
+                    <span class="tool-hint"><kbd>↵</kbd> to send <span class="muted">·</span> <kbd>⇧ ↵</kbd> for new line</span>
+                  </div>
+                  <div class="composer-meta">
+                    <span id="attachment-label"></span>
+                    <span class="char-count" id="char-count">0 / 8,000</span>
+                    <button class="send-button" id="send-button" data-action="send" aria-label="Send message" disabled>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <input type="file" id="file-input" hidden multiple accept=".pdf,.doc,.docx,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.png,.jpg,.jpeg,.webp,.gif,.bmp,.ico" />
+            </div>
+            <p class="composer-disclaimer">Berto can make mistakes. Check important info.</p>
+          </div>
+
+          <!-- NEW: Inject Split-Screen Artifact Drawer Here -->
+          <div class="artifact-resizer" id="artifact-resizer" hidden></div>
+          <div class="artifact-drawer" id="artifact-drawer" hidden>
+            <div class="artifact-header">
+              <div class="artifact-title">
+                <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span> 
+                <strong id="artifact-label">Live Workspace Artifact</strong>
+              </div>
+              <div class="artifact-actions">
+                <button class="icon-button" id="artifact-popout-btn" title="Open in New Tab">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </button>
+                
+                <button class="icon-button" id="artifact-download-btn" title="Download HTML File">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                </button>
+                <button class="icon-button" data-action="close-artifact" title="Close Preview">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="artifact-body">
+              <iframe id="artifact-frame" sandbox="allow-scripts allow-forms" title="Live Preview"></iframe>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- View 2: Writing Studio -->
+      <section class="view" id="view-writing" data-view="writing">
+        <div class="page-shell writing-page">
+          <div class="page-heading writing-heading">
+            <div>
+              <div class="eyebrow">
+                <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span> 
+                Voice Clone Studio
+              </div>
+              <h2>Writing Studio</h2>
+              <p>Draft with your personal voice. Berto matches your sentence structure and rhythm from saved samples.</p>
+            </div>
+            <div class="writing-heading-actions">
+              <button class="button primary glow-btn" data-action="new-writing">
+                <span>New Draft</span>
+                <span class="btn-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="writing-studio-grid">
+            <div class="writing-canvas panel">
+              <div class="studio-toolbar">
+                <div class="toolbar-left">
+                  <div class="select-wrapper">
+                    <span class="select-label">Format:</span>
+                    <select class="mode-select" id="writing-mode" aria-label="Writing format">
+                      <option>Essay</option>
+                      <option>Email</option>
+                      <option>Blog</option>
+                      <option>Report</option>
+                      <option>Resume</option>
+                      <option>Cover Letter</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="toolbar-right">
+                  <span class="save-status-badge" id="writing-save-status">Saved locally</span>
+                  <button class="button ghost tool-btn dictate-btn" id="dictate-btn" data-action="dictate-notes" title="Voice Dictate Note">
+                    <span class="btn-flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Dictate</span>
+                  </button>
+                  <button class="icon-button tool-btn" data-action="writing-clear" title="Clear Draft" aria-label="Clear draft">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="editor-container">
+                <textarea id="writing-input" placeholder="Start typing your draft, paste rough notes, or outline your thoughts here..."></textarea>
+              </div>
+
+              <div class="writing-footer-row">
+                <div class="metrics-pill">
+                  <span class="metrics-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                  <span id="writing-metrics">0 words · readability 0</span>
+                </div>
+                <div class="writing-export-actions">
+                  <button class="export-btn" data-action="export-writing-md">.MD</button>
+                  <button class="export-btn" data-action="export-writing-txt">.TXT</button>
+                </div>
+              </div>
+
+              <div class="writing-output-pane" id="writing-output" hidden></div>
+
+              <div class="editor-footer">
+                <div class="active-profile-indicator">
+                  <span class="profile-dot"></span>
+                  <span>Voice: <strong id="active-profile">Clear & thoughtful</strong></span>
+                </div>
+                <button class="button primary studio-generate-btn" data-action="writing-generate">
+                  <span>Generate in My Voice</span>
+                  <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span>
+                </button>
+              </div>
+            </div>
+
+            <aside class="writing-tools">
+              <div class="panel profile-card studio-card">
+                <div class="card-heading">
+                  <span class="card-title">
+                    <span class="title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> 
+                    Writing Profile
+                  </span>
+                  <button class="text-button studio-link" data-action="profile-settings">Edit Voice</button>
+                </div>
+                <h3 id="profile-card-name">Clear & thoughtful</h3>
+                <p id="profile-card-summary">Warm, precise, and easy to follow.</p>
+                <div class="profile-tags" id="profile-tags">
+                  <span>Balanced</span><span>Conversational</span><span>Plain language</span>
+                </div>
+                <button class="button ghost profile-sample-button studio-sample-btn" data-action="edit-writing-profile">
+                  <span>Manage Voice Samples</span>
+                  <span class="btn-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                </button>
+              </div>
+
+              <div class="panel prompt-card studio-card">
+                <div class="card-heading">
+                  <span class="card-title">
+                    <span class="title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> 
+                    Quick Starters
+                  </span>
+                </div>
+                <div class="template-list">
+                  <button class="template-item" data-writing-template="Write a professional email with a clear subject line and friendly tone">
+                    <div class="template-info">
+                      <strong>Professional Email</strong>
+                      <small>Clear subject line & friendly tone</small>
+                    </div>
+                    <span class="template-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                  </button>
+                  <button class="template-item" data-writing-template="Write a concise report with an executive summary and key findings">
+                    <div class="template-info">
+                      <strong>Project Report</strong>
+                      <small>Executive summary & key findings</small>
+                    </div>
+                    <span class="template-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                  </button>
+                  <button class="template-item" data-writing-template="Write a compelling cover letter tailored to a role">
+                    <div class="template-info">
+                      <strong>Cover Letter</strong>
+                      <small>Tailored application pitch</small>
+                    </div>
+                    <span class="template-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 3: Files Section -->
+      <section class="view" id="view-files" data-view="files">
+        <div class="page-shell">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">Workspace library</div>
+              <h2>Files</h2>
+              <p>Keep the context behind your conversations close.</p>
+            </div>
+            <button class="button primary" data-action="upload">
+              <span>Upload files</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
+          <div class="upload-panel panel" id="upload-panel">
+            <div class="upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+            <h3>Drop files here</h3>
+            <p>or browse from your device · PDF, DOCX, TXT, MD up to 5MB</p>
+            <button class="button ghost" data-action="upload">Browse files</button>
+          </div>
+          <div class="file-grid" id="file-grid"></div>
+        </div>
+      </section>
+
+      <!-- View 4: Project Kanban Board -->
+      <section class="view" id="view-projects" data-view="projects">
+        <div class="page-shell">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">Organize work</div>
+              <h2>Project Board</h2>
+              <p>Drag & drop tasks between statuses or let Berto manage them via chat.</p>
+            </div>
+            <button class="button primary" data-action="new-kanban-task">
+              <span>New Task</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          <div class="kanban-board" id="kanban-board">
+            <div class="kanban-column" data-status="todo" ondragover="event.preventDefault()" ondrop="handleKanbanDrop(event, 'todo')">
+              <div class="column-header">
+                <span class="col-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg></span>
+                To Do 
+                <span class="count-badge" id="count-todo">0</span>
+              </div>
+              <div class="column-tasks" id="tasks-todo"></div>
+            </div>
+            <div class="kanban-column" data-status="in-progress" ondragover="event.preventDefault()" ondrop="handleKanbanDrop(event, 'in-progress')">
+              <div class="column-header">
+                <span class="col-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 6 12 12 16 14"/><circle cx="12" cy="12" r="10"/></svg></span>
+                In Progress 
+                <span class="count-badge" id="count-in-progress">0</span>
+              </div>
+              <div class="column-tasks" id="tasks-in-progress"></div>
+            </div>
+            <div class="kanban-column" data-status="done" ondragover="event.preventDefault()" ondrop="handleKanbanDrop(event, 'done')">
+              <div class="column-header">
+                <span class="col-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                Completed 
+                <span class="count-badge" id="count-done">0</span>
+              </div>
+              <div class="column-tasks" id="tasks-done"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 5: Voice Mode View -->
+      <section class="view" id="view-voice" data-view="voice">
+        <div class="voice-shell meeting-layout">
+          <div class="voice-chat-pane" id="voice-chat-pane">
+            <div class="voice-chat-top-half">
+              <div class="voice-pane-header">
+                <div class="eyebrow">
+                  <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span>
+                  Live AI Session
+                </div>
+                <h3>Session Dashboard</h3>
+              </div>
+
+              <!-- Live Bento Grid Session Metrics -->
+<div class="bento-metrics-grid">
+  <!-- Bento Card 1: AI Engine State & Timer (Full Width) -->
+  <div class="bento-card bento-span-2 highlight-card">
+    <div class="bento-header">
+      <span class="bento-title">AI Engine State</span>
+      <span class="session-timer" id="voice-session-timer">00:00</span>
+    </div>
+    <div class="bento-body">
+      <div class="voice-status" id="voice-status">Ready to listen</div>
+      <span class="bento-subtext">Gemini 3.1 Flash Live</span>
+    </div>
+  </div>
+
+  <!-- Bento Card 2: Vision Feed Status -->
+  <div class="bento-card">
+    <div class="bento-header">
+      <span class="bento-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 2h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </span>
+      <span class="bento-title">Vision</span>
+    </div>
+    <div class="dash-pill" id="pill-vision">
+      <span id="pill-vision-text">Vision Off</span>
+    </div>
+    <!-- Mic Status Pill -->
+    <div class="dash-pill" id="pill-mic">
+      <span id="pill-mic-text">Mic Off</span>
+    </div>
+  </div>
+
+  <!-- Bento Card 3: Audio Stream Rate -->
+  <div class="bento-card">
+    <div class="bento-header">
+      <span class="bento-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </span>
+      <span class="bento-title">Sample Rate</span>
+    </div>
+    <div class="bento-metric-val">16 <small>kHz</small></div>
+    <!-- Volume Meter -->
+    <div class="bento-meter"><div class="bento-meter-fill" id="bento-volume-fill"></div></div>
+    <span class="bento-subtext" id="bento-volume-val">0%</span>
+  </div>
+</div>
+            </div>
+
+            <div class="voice-chat-bottom-half" id="voice-chat-bottom-half">
+              <div class="video-feed-box" id="camera-feed-box" hidden>
+                <div class="video-feed-label">Camera</div>
+                <video id="camera-video-element" autoplay playsinline muted></video>
+              </div>
+
+              <div class="video-feed-box" id="screen-feed-box" hidden>
+                <div class="video-feed-label">Screen Share</div>
+                <video id="screen-video-element" autoplay playsinline muted></video>
+              </div>
+            </div>
+          </div>
+
+          <div class="voice-stage-pane">
+            <div class="voice-stage-header">
+              <div class="voice-model-badge" id="voice-model-badge">
+                <span class="status-dot"></span>
+                <span class="voice-model-label">Berto 3.1 Flash Live</span>
+              </div>
+              <div class="voice-voice-selector">
+                <label for="voice-select">Voice</label>
+                <select id="voice-select" aria-label="Select voice">
+                  <option value="Kore" selected>Kore — Professional, balanced</option>
+                  <option value="Puck">Puck — Upbeat, friendly</option>
+                  <option value="Charon">Charon — Deep, calm</option>
+                  <option value="Fenrir">Fenrir — Strong, energetic</option>
+                  <option value="Aoede">Aoede — Articulate, engaging</option>
+                  <option value="Leda">Leda — Soft, clear</option>
+                  <option value="Zephyr">Zephyr — Bright, expressive</option>
+                  <option value="Orus">Orus — Rich, resonant</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="voice-stage-container" id="voice-stage-container">
+              <div class="voice-indicator is-idle" id="voice-indicator">
+                <div class="voice-visualizer-center" id="voice-visualizer-center">
+                  <canvas id="voice-canvas-visualizer"></canvas>
+                </div>
+              </div>
+              <div class="voice-wave" id="voice-wave" aria-label="Audio level indicator">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <div class="voice-controls-bar">
+              <button class="voice-button" id="voice-toggle-btn" data-action="voice-toggle" aria-label="Toggle voice">
+                <span class="voice-button-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
+                <span class="voice-button-label">Start Speaking</span>
+              </button>
+              <button class="voice-button secondary voice-tool-btn" id="voice-camera-btn" data-action="voice-camera" aria-label="Toggle camera">
+                <span class="voice-button-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 2h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+                <span class="voice-button-label">Camera</span>
+              </button>
+              <button class="voice-button secondary voice-tool-btn" id="voice-screen-btn" data-action="voice-screen" aria-label="Toggle screen share">
+                <span class="voice-button-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                <span class="voice-button-label">Screen</span>
+              </button>
+              <button class="voice-button secondary" id="voice-reset-btn" data-action="voice-reset" aria-label="Reset conversation">
+                <span class="voice-button-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+                <span class="voice-button-label">Reset</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 6: Settings Section -->
+      <section class="view" id="view-settings" data-view="settings">
+        <div class="page-shell settings-page">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">Your workspace</div>
+              <h2>Settings</h2>
+              <p>Make Berto feel more like yours.</p>
+            </div>
+          </div>
+          
+          <div class="settings-layout">
+            <nav class="settings-nav">
+              <button class="active">
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                </span>
+                Appearance
+              </button>
+              <button>
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </span>
+                AI preferences
+              </button>
+              <button>
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                Account
+              </button>
+              <button>
+                <span class="nav-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                Privacy
+              </button>
+            </nav>
+
+            <div class="settings-content">
+              <div class="settings-section">
+                <h3>Appearance</h3>
+                <p class="section-copy">Tune the way Berto looks and feels.</p>
+                
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Theme</strong>
+                    <span>Choose a color scheme</span>
+                  </div>
+                  <div class="segmented">
+                    <button class="active" data-setting-theme="dark">Dark</button>
+                    <button data-setting-theme="light">Light</button>
+                  </div>
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Density</strong>
+                    <span>Adjust the amount of space in the interface</span>
+                  </div>
+                  <div class="segmented">
+                    <button data-setting-density="compact">Compact</button>
+                    <button class="active" data-setting-density="comfortable">Comfortable</button>
+                  </div>
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Motion</strong>
+                    <span>Use subtle transitions and animations</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="motion-toggle" aria-label="Motion" checked>
+                    <span></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>AI preferences</h3>
+                <p class="section-copy">Control the way responses are generated.</p>
+                
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Gemini API key</strong>
+                    <span>Stored locally in this browser and never sent anywhere else.</span>
+                  </div>
+                  <input class="search-input api-key-input" id="api-key-setting" type="password" placeholder="AIza..." autocomplete="off">
+                </div>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Response Style</strong>
+                    <span>Default verbosity for AI answers</span>
+                  </div>
+                  <select id="response-style-setting" aria-label="Response style">
+                    <option value="balanced" selected>Balanced & concise</option>
+                    <option value="detailed">Detailed & thorough</option>
+                    <option value="compact">Brief & direct</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Account</h3>
+                <p class="section-copy">Manage your workspace identity and profile.</p>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Workspace Name</strong>
+                    <span>How Berto refers to you</span>
+                  </div>
+                  <input class="search-input api-key-input" id="name-setting" type="text" placeholder="Your name" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Privacy & Data</h3>
+                <p class="section-copy">Your data stays in your browser by default.</p>
+
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <strong>Local Data Storage</strong>
+                    <span>Export or delete all chat history and offline assets</span>
+                  </div>
+                  <div class="setting-actions">
+                    <button class="button ghost" data-action="export">
+                      <span>Export my data</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                    </button>
+                    <button class="button ghost" data-action="import-data">
+                      <span>Import backup</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                    </button>
+                    <button class="button danger" data-action="clear-data">Delete local data</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Global Modals & Notifications -->
+  <div class="toast-stack" id="toasts" aria-live="polite"></div>
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h3 id="modal-title">Search chats</h3>
+        <button class="icon-button" data-action="close-modal" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="image-lightbox" hidden data-action="close-lightbox">
+    <img id="lightbox-image" src="" alt="Expanded image">
+  </div>
+  <div class="modal-backdrop" id="html-runner-modal" hidden>
+    <div class="modal html-runner-modal" role="dialog" aria-modal="true" aria-labelledby="html-runner-title">
+      <div class="modal-head">
+        <h3 id="html-runner-title">HTML Preview</h3>
+        <button class="icon-button" data-action="close-html-runner" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="html-runner-body">
+        <iframe id="html-runner-frame" sandbox="allow-scripts allow-forms" title="HTML preview"></iframe>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="camera-modal" hidden>
+    <div class="modal camera-modal" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+      <div class="modal-head"><h3 id="camera-modal-title">Take a photo</h3><button class="icon-button" data-action="close-camera-modal" aria-label="Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="camera-body">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <canvas id="camera-canvas" hidden></canvas>
+        <div class="camera-actions">
+          <button class="button primary capture-btn snap-photo-button camera-button" id="capture-btn" data-action="capture">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 2h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Capture photo</span>
+          </button>
+          <button class="button ghost" id="retake-btn" data-action="retake" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Retake</span>
+          </button>
+          <button class="button primary" id="send-camera-btn" data-action="send-camera" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span>Send to chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- Centered 16:9 Artifact Preview Modal -->
+  <div class="modal-backdrop artifact-modal-backdrop" id="artifact-modal" hidden>
+    <div class="modal artifact-modal" role="dialog" aria-modal="true" aria-labelledby="artifact-label">
+      <div class="artifact-header">
+        <div class="artifact-title">
+          <span class="spark"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></span> 
+          <strong id="artifact-label">Live Workspace Artifact</strong>
+        </div>
+        <div class="artifact-actions">
+          <button class="icon-button" id="artifact-download-btn" title="Download HTML File">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          </button>
+          <button class="icon-button" data-action="close-artifact" title="Close Preview">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="artifact-body-16-9">
+        <iframe id="artifact-frame" sandbox="allow-scripts allow-forms" title="Live 16:9 Preview"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/live.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
